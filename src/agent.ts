@@ -9,67 +9,6 @@ import type {
 import { Messages } from "openai/resources/chat/completions.mjs";
 import z from "zod";
 
-// const client = new OpenAI();
-
-// const stream = await client.chat.completions.create({
-//   model: "gpt-5.5",
-//   messages: [
-//     {
-//       role: "user",
-//       content: "Whats the weather in San Diego right now?",
-//     },
-//   ],
-//   stream: true,
-//   tools: [
-//     zodFunction({
-//       name: "get_weather",
-//       description: "Fetches the weater given a location",
-//       parameters: z.object({
-//         city: z.string(),
-//         state: z.string(),
-//       }),
-//     }),
-//   ],
-// });
-
-// let response = "";
-
-// const toolCalls = new Map<number, ChatCompletionMessageFunctionToolCall>();
-
-// for await (const chunk of stream) {
-//   const choice = chunk.choices[0];
-
-//   const delta = choice?.delta;
-
-//   for (const toolCall of delta?.tool_calls ?? []) {
-//     const cachedToolCall = toolCalls.get(toolCall.index);
-
-//     if (!cachedToolCall) {
-//       toolCalls.set(toolCall.index, {
-//         id: toolCall.id ?? "",
-//         type: "function",
-//         function: {
-//           name: toolCall.function?.name ?? "",
-//           arguments: toolCall.function?.arguments ?? "",
-//         },
-//       });
-//     } else {
-//       cachedToolCall.function.arguments += toolCall.function?.arguments ?? "";
-//     }
-//   }
-
-//   if (delta?.content) {
-//     response += delta.content;
-//   }
-// }
-
-// if (toolCalls.size > 0) {
-//   // execute the tools
-// } else if (response) {
-// }
-
-// console.log(response, toolCalls);
-
 const toolRegistry = {
   get_cryptocurrency_prices: async (input: { cryptocurrencies: string[] }) => {
     const data = await fetch(
@@ -186,10 +125,6 @@ async function startAgent(prompt: string, maxSteps: number) {
     }
   }
 }
-
-// toolRegistry.get_cryptocurrency_prices({
-//   cryptocrruencies: ["bitcoin", "solana", "ethereum"],
-// });
 
 await startAgent("Whats the price of fewfjewn?", 10);
 

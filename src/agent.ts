@@ -75,7 +75,7 @@ const toolRegistry = {
     const data = await fetch(
       `https://api.coingecko.com/api/v3/simple/price?ids=${input.cryptocurrencies.join(",")}&vs_currencies=usd`,
     ).then((res) => res.json());
-
+    console.log(data);
     return data as Record<
       string,
       {
@@ -95,7 +95,7 @@ async function startAgent(prompt: string, maxSteps: number) {
     content: prompt,
   });
 
-  //agent loop
+  //creating the stream
   for (let i = 0; i < maxSteps; i++) {
     const stream = await client.chat.completions.create({
       model: "gpt-5.5",
@@ -106,16 +106,22 @@ async function startAgent(prompt: string, maxSteps: number) {
           name: "get_cryptocurrency_prices",
           description: "Fetches the prices of cryptocurrencies",
           parameters: z.object({
-            cryptocurrencies: z
-              .array(z.string())
-              .describe(
-                "a list of cryptocurrency names e.g. bitcoin, etheruem, solana, etc.",
-              ),
+            cryptocurrencies: z.array(
+              z.enum([
+                "bitcoin",
+                "solana",
+                "ethereum",
+                "bananacoin",
+                "banana",
+                "fewfjewn",
+              ]),
+            ),
           }),
         }),
       ],
     });
 
+    //accumlating response from stream
     const toolCalls = new Map<number, ChatCompletionMessageFunctionToolCall>();
     let response = "";
 
@@ -146,11 +152,12 @@ async function startAgent(prompt: string, maxSteps: number) {
     }
 
     if (toolCalls.size > 0) {
-      //execute tools
       messages.push({
         role: "assistant",
         tool_calls: toolCalls.values().toArray(),
       });
+
+      //tool execution loop
       for (const toolCall of toolCalls.values()) {
         const tool =
           toolRegistry[toolCall.function.name as keyof typeof toolRegistry];
@@ -169,6 +176,7 @@ async function startAgent(prompt: string, maxSteps: number) {
           content: JSON.stringify(result),
         });
       }
+      //exit condition
     } else if (response) {
       messages.push({
         role: "assistant",
@@ -183,6 +191,6 @@ async function startAgent(prompt: string, maxSteps: number) {
 //   cryptocrruencies: ["bitcoin", "solana", "ethereum"],
 // });
 
-await startAgent("Whats the price of bitcoin?", 10);
+await startAgent("Whats the price of fewfjewn?", 10);
 
 console.log(messages);

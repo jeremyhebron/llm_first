@@ -7,7 +7,7 @@ import type {
   ChatCompletionMessageToolCall,
 } from "openai/resources";
 import { Messages } from "openai/resources/chat/completions.mjs";
-import z from "zod";
+import z, { string } from "zod";
 
 const toolRegistry = {
   get_cryptocurrency_prices: async (input: { cryptocurrencies: string[] }) => {
@@ -21,6 +21,13 @@ const toolRegistry = {
         usd: number;
       }
     >;
+  },
+  product_query: async (input: { query: string }) => {
+    const data = await fetch(
+      `https://dummyjson.com/products/search?q=${input.query}`,
+    ).then((res) => res.json());
+
+    return data;
   },
 };
 
@@ -55,6 +62,13 @@ async function startAgent(prompt: string, maxSteps: number) {
                 "fewfjewn",
               ]),
             ),
+          }),
+        }),
+        zodFunction({
+          name: "product_query",
+          description: "Fetches product data based on query",
+          parameters: z.object({
+            query: z.string(),
           }),
         }),
       ],
@@ -126,6 +140,8 @@ async function startAgent(prompt: string, maxSteps: number) {
   }
 }
 
-await startAgent("Whats the price of fewfjewn?", 10);
+// await startAgent("Whats the price of fewfjewn?", 10);
+
+await startAgent("Can i see a review of any phone?", 10);
 
 console.log(messages);

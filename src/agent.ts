@@ -34,7 +34,10 @@ const toolRegistry = {
 const messages: ChatCompletionMessageParam[] = [];
 
 async function startAgent(prompt: string, maxSteps: number) {
-  const client = new OpenAI();
+  const client = new OpenAI({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+    baseURL: "https://api.anthropic.com/v1",
+  });
 
   messages.push({
     role: "user",
@@ -44,7 +47,7 @@ async function startAgent(prompt: string, maxSteps: number) {
   //creating the stream
   for (let i = 0; i < maxSteps; i++) {
     const stream = await client.chat.completions.create({
-      model: "gpt-5.5",
+      model: "claude-opus-4-8",
       messages,
       stream: true,
       tools: [
@@ -68,7 +71,7 @@ async function startAgent(prompt: string, maxSteps: number) {
           name: "product_query",
           description: "Fetches product data based on query",
           parameters: z.object({
-            query: z.string(),
+            query: z.enum(["iphone", "samsung", "android", "mascara"]),
           }),
         }),
       ],
@@ -142,6 +145,6 @@ async function startAgent(prompt: string, maxSteps: number) {
 
 // await startAgent("Whats the price of fewfjewn?", 10);
 
-await startAgent("Can i see a review of any phone?", 10);
+await startAgent("can i see what kind of acessories come with iphones?", 10);
 
 console.log(messages);
